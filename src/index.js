@@ -2,13 +2,17 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import _ from "lodash";
-import Tone from "tone"
+import Tone from "tone";
 import styles from './index.css';
+import ControlBar from './ControlBar';
 
 class Sequencer extends React.Component {
 
     constructor(props) {
         super(props);
+
+        this.handleStop = this.handleStop.bind(this);
+
         var squares = Array(this.props.rows).fill(new Array(this.props.cols));
         this.state = {
             squares: squares,
@@ -22,7 +26,6 @@ class Sequencer extends React.Component {
             this.stepChange(time);
         }, "4n").start(0);
         this.setState({loop: loop});
-        Tone.Transport.start();
     }
 
     stepChange(time) {
@@ -41,39 +44,41 @@ class Sequencer extends React.Component {
         this.state.sine.stop(now + 2);
     }
 
+    handleStop() {
+        this.setState({position: 0});
+    }
+
     renderSquare(i) { var content;
         if (i === this.state.position) {
-            content = <button style={{border: "#000"}} onClick={() => this.handleClick()} />    
+            content = <button className={styles} key={i} style={{backgroundColor: "#4CAF50"}} onClick={() => this.handleClick()} />    
         }
         else {
-            content = <button onClick={() => this.handleClick()} />    
+            content = <button className={styles} key={i} onClick={() => this.handleClick()} />    
         }
         return content;
     }
 
     render() {
-        var squareComps = [];
-        console.log("squares: ", this.state.squares);
-        var that = this;
-        _.forEach(this.state.squares, function(element, elementi) {
-            squareComps.push(
-            <div className="row" key={elementi}>
-                {_.map(element, function(sq, sqi) {
-                    return (<div className="col-sm-2" key={elementi + "," +sqi}>
-                                {that.renderSquare(sqi)}
-                            </div>)
-                })}
-            </div>)
-        });
+        let grid = [];
+        for (let i = 0; i < this.props.rows; i++) {
+            let row = []; 
+            for (let j = 0; j < this.props.cols; j++) {
+                row.push(this.renderSquare(j));
+            }
+            grid.push(<div key={i}> {row} </div>);
+        }
         return (
-           <div>{squareComps}</div>
+            <div>
+                {<ControlBar onStop={this.handleStop} />}
+                {grid}
+            </div>
         );
     }
 }
 /* =================== */
 ReactDOM.render(
     <div style={{width: 800, height: 800}} className="container">
-        <Sequencer className={styles} rows={3} cols={4}/>
+        <Sequencer rows={3} cols={4}/>
     </div>,
     document.getElementById('root')
   );
