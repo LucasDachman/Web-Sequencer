@@ -2,3 +2,18 @@ button {
     height: 80px;
     width: 80px;
 }
+
+.timelineTickActive {
+    height: 10px;
+    width: 80px;
+    background: #7F0000;
+    padding: 0;
+    display: inline-block;
+}
+
+.timelineTickInactive {
+    height: 10px;
+    width: 80px;
+    padding: 0;
+    display: inline-block;
+}

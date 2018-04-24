@@ -5,6 +5,7 @@ import _ from "lodash";
 import Tone from "tone";
 import styles from './index.css';
 import ControlBar from './ControlBar';
+import Timeline from "./Timeline";
 
 class Sequencer extends React.Component {
 
@@ -12,12 +13,11 @@ class Sequencer extends React.Component {
         super(props);
 
         this.handleStop = this.handleStop.bind(this);
+        const matrix = Array(this.props.rows * this.props.cols).fill(false);
 
-        var squares = Array(this.props.rows).fill(new Array(this.props.cols));
         this.state = {
-            squares: squares,
-            sine: new Tone.Oscillator(440, "sine").toMaster(),
             position: 0,
+            matrix: matrix
         };
     }
 
@@ -37,8 +37,10 @@ class Sequencer extends React.Component {
     }
 
     stepChange(time) {
-        console.log("player", this.state.player);
-        this.state.sampler.triggerAttack("C3");
+        const pos = this.state.position;
+        if (this.state.matrix[pos]) {
+            this.state.sampler.triggerAttack("C3");
+        }
         Tone.Draw.schedule(() => {
             console.log("change pos: ", this.state.position);
             let position = this.state.position;
@@ -48,10 +50,10 @@ class Sequencer extends React.Component {
         }, time)
     }
 
-    handleClick() {
-        var now = Tone.now();
-        this.state.sine.start(now);
-        this.state.sine.stop(now + 2);
+    handleClick(i) {
+        var matrix = this.state.matrix;
+        matrix[i] = !matrix[i];
+        this.setState({ matrix: matrix });
     }
 
     handleStop() {
@@ -59,21 +61,23 @@ class Sequencer extends React.Component {
     }
 
     renderSquare(i) { var content;
-        if (i === this.state.position) {
-            content = <button className={styles} key={i} style={{backgroundColor: "#4CAF50"}} onClick={() => this.handleClick()} />    
+        var matPos = i % this.props.cols;
+        if (this.state.matrix[i]) {
+            content = <button className={styles} key={i} style={{backgroundColor: "#4CAF50"}} onClick={() => this.handleClick(i)} />    
         }
         else {
-            content = <button className={styles} key={i} onClick={() => this.handleClick()} />    
+            content = <button className={styles} key={i} onClick={() => this.handleClick(i)} />    
         }
         return content;
     }
 
     render() {
+        var count = 0;
         let grid = [];
         for (let i = 0; i < this.props.rows; i++) {
             let row = []; 
             for (let j = 0; j < this.props.cols; j++) {
-                row.push(this.renderSquare(j));
+                row.push(this.renderSquare(count++));
             }
             grid.push(<div key={i}> {row} </div>);
         }
@@ -81,6 +85,7 @@ class Sequencer extends React.Component {
             <div>
                 {<ControlBar onStop={this.handleStop} />}
                 {grid}
+                {<Timeline length={this.props.cols} position={this.state.position} />}
             </div>
         );
     }
