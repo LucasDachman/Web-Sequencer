@@ -37,17 +37,15 @@ class Sequencer extends React.Component {
     }
 
     stepChange(time) {
+        let position = this.state.position;
+        position++;
+        position %= this.props.cols;
+        this.setState({ position: position });
+
         const pos = this.state.position;
         if (this.state.matrix[pos]) {
             this.state.sampler.triggerAttack("C3");
         }
-        Tone.Draw.schedule(() => {
-            console.log("change pos: ", this.state.position);
-            let position = this.state.position;
-            position++;
-            position %= this.props.cols;
-            this.setState({ position: position });
-        }, time)
     }
 
     handleClick(i) {
@@ -61,7 +59,6 @@ class Sequencer extends React.Component {
     }
 
     renderSquare(i) { var content;
-        var matPos = i % this.props.cols;
         if (this.state.matrix[i]) {
             content = <button className={styles} key={i} style={{backgroundColor: "#4CAF50"}} onClick={() => this.handleClick(i)} />    
         }
