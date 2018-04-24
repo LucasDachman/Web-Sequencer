@@ -25,10 +25,20 @@ class Sequencer extends React.Component {
         const loop = new Tone.Loop((time) => {
             this.stepChange(time);
         }, "4n").start(0);
-        this.setState({loop: loop});
+
+        var sampler = new Tone.Sampler({ 
+            "C3": "../Tabla.wav",
+        }).toMaster();
+
+        this.setState({
+            loop: loop,
+            sampler: sampler
+        });
     }
 
     stepChange(time) {
+        console.log("player", this.state.player);
+        this.state.sampler.triggerAttack("C3");
         Tone.Draw.schedule(() => {
             console.log("change pos: ", this.state.position);
             let position = this.state.position;
