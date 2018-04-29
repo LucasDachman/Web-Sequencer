@@ -5601,6 +5601,10 @@ react-error-overlay@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/react-error-overlay/-/react-error-overlay-4.0.0.tgz#d198408a85b4070937a98667f500c832f86bd5d4"
 
+react-file-picker@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/react-file-picker/-/react-file-picker-0.0.5.tgz#b1505080c7d2d22149aeae879638007e8e3154ae"
+
 react-scripts@1.1.4:
   version "1.1.4"
   resolved "https://registry.yarnpkg.com/react-scripts/-/react-scripts-1.1.4.tgz#d5c230e707918d6dd2d06f303b10f5222d017c88"

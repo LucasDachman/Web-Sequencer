@@ -7,6 +7,7 @@ import WebMidi from "webmidi";
 import styles from './index.css';
 import ControlBar from './ControlBar';
 import Timeline from "./Timeline";
+import FilePickers from "./FilePickers";
 
 class Sequencer extends React.Component {
 
@@ -166,9 +167,12 @@ class Sequencer extends React.Component {
         }
         return (
             <div>
-                {<ControlBar onPlay={this.handlePlay} onStop={this.handleStop} />}
-                {grid}
-                {<Timeline length={this.props.cols} position={this.state.position} />}
+                <FilePickers style={{display: "inline-block"}}/>
+                <div style={{display: "inline-block"}}>
+                    <ControlBar onPlay={this.handlePlay} onStop={this.handleStop} />
+                    {grid}
+                    <Timeline length={this.props.cols} position={this.state.position} />
+                </div>
             </div>
         );
     }
