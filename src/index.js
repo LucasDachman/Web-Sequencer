@@ -12,12 +12,16 @@ class Sequencer extends React.Component {
     constructor(props) {
         super(props);
 
+        let tempo = 120;
         this.handleStop = this.handleStop.bind(this);
         const matrix = Array(this.props.rows * this.props.cols).fill(false);
+        const players = Array(this.props.rows).fill(new Tone.Player(null).toMaster());
 
         this.state = {
             position: 0,
-            matrix: matrix
+            matrix: matrix,
+            players: players,
+            tempo: tempo
         };
     }
 
@@ -26,25 +30,39 @@ class Sequencer extends React.Component {
             this.stepChange(time);
         }, "4n").start(0);
 
-        var sampler = new Tone.Sampler({ 
-            "C3": "../Tabla.wav",
-        }).toMaster();
+        const path = "./Fav_Drums/"
+        const samples = ["P - Snap 2.wav", "P - Toms.wav", "S - Cool.wav", "Tabla.wav"];
+        const players = this.state.players;
+        _.forEach(players, (player, index) => {
+            console.log(samples[ index ]);
+            player.load(path + samples[index]);
+        })
 
         this.setState({
             loop: loop,
-            sampler: sampler
+            players: players
         });
     }
-
+    shouldComponentUpdate(nextProps, nextState) {
+        const didChange = !(
+            nextState.position === this.state.position &&
+            _.isEqual(nextState.matrix, this.state.matrix)
+        );
+        return true;
+    }
     stepChange(time) {
         let position = this.state.position;
         position++;
         position %= this.props.cols;
         this.setState({ position: position });
 
-        const pos = this.state.position;
-        if (this.state.matrix[pos]) {
-            this.state.sampler.triggerAttack("C3");
+        const rows = this.props.rows;
+        const cols = this.props.cols;
+        for (let i = 0; i < rows; i++) {
+            const step = i * cols + position;
+            if (this.state.matrix[step]) {
+                this.state.players[i].restart(time);
+            }
         }
     }
 
