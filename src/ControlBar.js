@@ -17,6 +17,7 @@ class ControlBar extends React.Component {
         console.log("onClickPlay");
         this.setState({playing: true});
         Tone.Transport.start();
+        this.props.onPlay();
     }
 
     onClickStop() {

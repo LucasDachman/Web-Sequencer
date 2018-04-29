@@ -12,37 +12,39 @@ class Sequencer extends React.Component {
     constructor(props) {
         super(props);
 
-        let tempo = 120;
+        Tone.Transport.bpm.value = 120;
         this.handleStop = this.handleStop.bind(this);
+        this.handlePlay = this.handlePlay.bind(this);
         const matrix = Array(this.props.rows * this.props.cols).fill(false);
-        const players = Array(this.props.rows).fill(new Tone.Player(null).toMaster());
+        const players = new Tone.Players(null).toMaster();
 
         this.state = {
             position: 0,
             matrix: matrix,
             players: players,
-            tempo: tempo
         };
     }
 
     componentDidMount() {
         const loop = new Tone.Loop((time) => {
-            this.stepChange(time);
+            this.stepChange();
+            this.playActive(time);
         }, "4n").start(0);
 
         const path = "./Fav_Drums/"
         const samples = ["P - Snap 2.wav", "P - Toms.wav", "S - Cool.wav", "Tabla.wav"];
         const players = this.state.players;
-        _.forEach(players, (player, index) => {
-            console.log(samples[ index ]);
-            player.load(path + samples[index]);
-        })
+        const rows = this.props.rows;
+        for( let i = 0; i < rows; i++) {
+            players.add(i, path + samples[i]);
+        }
 
         this.setState({
-            loop: loop,
-            players: players
+            players: players,
+            loop: loop
         });
     }
+
     shouldComponentUpdate(nextProps, nextState) {
         const didChange = !(
             nextState.position === this.state.position &&
@@ -50,18 +52,23 @@ class Sequencer extends React.Component {
         );
         return true;
     }
-    stepChange(time) {
+
+    stepChange() {
         let position = this.state.position;
         position++;
         position %= this.props.cols;
         this.setState({ position: position });
+    }
 
+    playActive(time) {
+        const position = this.state.position;
         const rows = this.props.rows;
         const cols = this.props.cols;
         for (let i = 0; i < rows; i++) {
             const step = i * cols + position;
             if (this.state.matrix[step]) {
-                this.state.players[i].restart(time);
+                this.state.players.get(i).restart(time);
+                console.log("current player: ", i);
             }
         }
     }
@@ -74,6 +81,12 @@ class Sequencer extends React.Component {
 
     handleStop() {
         this.setState({position: 0});
+    }
+
+    handlePlay() {
+        this.setState({position: -1});
+        //this.stepChange();
+//        this.playActive()
     }
 
     renderSquare(i) { var content;
@@ -98,7 +111,7 @@ class Sequencer extends React.Component {
         }
         return (
             <div>
-                {<ControlBar onStop={this.handleStop} />}
+                {<ControlBar onPlay={this.handlePlay} onStop={this.handleStop} />}
                 {grid}
                 {<Timeline length={this.props.cols} position={this.state.position} />}
             </div>
