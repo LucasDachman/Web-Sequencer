@@ -1,11 +1,17 @@
+/*
 button {
     height: 80px;
     width: 80px;
 }
+*/
+.step {
+    height: 200px;
+    width: 200px;
+}
 
 .timelineTickActive {
     height: 10px;
-    width: 80px;
+    width: 200px;
     background: #7F0000;
     padding: 0;
     display: inline-block;

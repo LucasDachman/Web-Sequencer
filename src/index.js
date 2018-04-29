@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import _ from "lodash";
 import Tone from "tone";
+import WebMidi from "webmidi";
 import styles from './index.css';
 import ControlBar from './ControlBar';
 import Timeline from "./Timeline";
@@ -31,6 +32,7 @@ class Sequencer extends React.Component {
             this.playActive(time);
         }, "4n").start(0);
 
+        // sample players
         const path = "./Fav_Drums/"
         const samples = ["P - Snap 2.wav", "P - Toms.wav", "S - Cool.wav", "Tabla.wav"];
         const players = this.state.players;
@@ -39,10 +41,37 @@ class Sequencer extends React.Component {
             players.add(i, path + samples[i]);
         }
 
+        // webmidi
+        WebMidi.enable((err) => {
+            if (err) {
+                console.log("WebMidi could not be enabled.", err);
+            } else {
+                console.log("WebMidi enabled!");
+                // get first input device
+                const device = WebMidi.inputs[0];
+                console.log(WebMidi.inputs);
+                if (!_.isNil(device)) {
+                    console.log("Current device: ", device.name);
+
+                    device.addListener('noteon', 'all', (e) => {
+                        this.enableStep(e.note.number);
+                    });
+
+                    device.addListener('noteoff', 'all', (e) => {
+                        this.disableStep(e.note.number);
+                    });
+               }
+                else {
+                    console.log("No midi device");
+                }
+            }
+        });
         this.setState({
             players: players,
             loop: loop
         });
+ 
+
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -51,6 +80,32 @@ class Sequencer extends React.Component {
             _.isEqual(nextState.matrix, this.state.matrix)
         );
         return true;
+    }
+
+    enableStep(midiNote) {
+        const totalCols = this.props.cols;
+        const area = 16;
+        const row = Math.trunc(midiNote / area);
+		const col = midiNote % area;
+        const i = row * totalCols + col;
+
+        const matrix = this.state.matrix.slice();
+        matrix[i] = true;
+
+        this.setState({matrix: matrix});
+    }
+
+    disableStep(midiNote) {
+        const totalCols = this.props.cols;
+        const area = 16;
+        const row = Math.trunc(midiNote / area);
+        const col = midiNote % area;
+        const i = row * totalCols + col;
+
+        const matrix = this.state.matrix.slice();
+        matrix[i] = false;
+
+        this.setState({ matrix: matrix });
     }
 
     stepChange() {
@@ -74,7 +129,7 @@ class Sequencer extends React.Component {
     }
 
     handleClick(i) {
-        var matrix = this.state.matrix;
+        var matrix = this.state.matrix.slice();
         matrix[i] = !matrix[i];
         this.setState({ matrix: matrix });
     }
@@ -91,10 +146,10 @@ class Sequencer extends React.Component {
 
     renderSquare(i) { var content;
         if (this.state.matrix[i]) {
-            content = <button className={styles} key={i} style={{backgroundColor: "#4CAF50"}} onClick={() => this.handleClick(i)} />    
+            content = <button className="step" style={{backgroundColor: "#008CBA"}} key={i} onClick={() => this.handleClick(i)} />    
         }
         else {
-            content = <button className={styles} key={i} onClick={() => this.handleClick(i)} />    
+            content = <button className="step" style={{backgroundColor: "#CCFFFF"}} key={i} onClick={() => this.handleClick(i)} />    
         }
         return content;
     }

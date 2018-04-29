@@ -6940,6 +6940,10 @@ webidl-conversions@^4.0.0:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/webidl-conversions/-/webidl-conversions-4.0.2.tgz#a855980b1f0b6b359ba1d5d9fb39ae941faa63ad"
 
+webmidi@^2.0.4:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/webmidi/-/webmidi-2.0.4.tgz#e7e0a429cbfdd7a1622e346bde30664335d7bbe3"
+
 webpack-dev-middleware@^1.11.0:
   version "1.12.2"
   resolved "https://registry.yarnpkg.com/webpack-dev-middleware/-/webpack-dev-middleware-1.12.2.tgz#f8fc1120ce3b4fc5680ceecb43d777966b21105e"
