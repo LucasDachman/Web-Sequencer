@@ -19,7 +19,7 @@ button {
 
 .timelineTickInactive {
     height: 10px;
-    width: 80px;
+    width: 200px;
     padding: 0;
     display: inline-block;
 }
@@ -43,4 +43,12 @@ button {
     flex-direction: column;
     flex-wrap: nowrap;
     justify-content: space-between;
+}
+
+input {
+    width: 200px;
+    height: 20px;
+    transform: rotate(-90deg);
+    background: transparent;
+    border: none;
 }

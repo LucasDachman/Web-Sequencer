@@ -7,23 +7,23 @@ import WebMidi from "webmidi";
 import styles from './index.css';
 import ControlBar from './ControlBar';
 import Timeline from "./Timeline";
-import FilePickers from "./FilePickers";
 
 class Sequencer extends React.Component {
 
     constructor(props) {
         super(props);
 
+        this.path = "./Fav_Drums/";
+
         Tone.Transport.bpm.value = 120;
         this.handleStop = this.handleStop.bind(this);
         this.handlePlay = this.handlePlay.bind(this);
-        const matrix = Array(this.props.rows * this.props.cols).fill(false);
-        const players = new Tone.Players(null).toMaster();
 
         this.state = {
             position: 0,
-            matrix: matrix,
-            players: players,
+            matrix: Array(this.props.rows * this.props.cols).fill(false),
+            players: new Tone.Players(null).toMaster(),
+            fileNames: [],
         };
     }
 
@@ -145,6 +145,12 @@ class Sequencer extends React.Component {
 //        this.playActive()
     }
 
+    handleFiles(files, i) {
+        console.log(files);
+        this.state.fileNames[i] = files.name;
+        this.state.players.get(i).load(this.path + files[0].name);
+    }
+
     renderSquare(i) { var content;
         if (this.state.matrix[i]) {
             content = <button className="step" style={{backgroundColor: "#008CBA"}} key={i} onClick={() => this.handleClick(i)} />    
@@ -154,6 +160,7 @@ class Sequencer extends React.Component {
         }
         return content;
     }
+
 
     render() {
         var count = 0;
@@ -165,9 +172,20 @@ class Sequencer extends React.Component {
             }
             grid.push(<div className="step-row" key={i}> {row} </div>);
         }
+
+                    //{this.state.currentFiles[i]}
+        let filebtns = [];
+        for (let i = 0; i < this.props.rows; i++) {
+            filebtns.push(
+                <input type="file" onChange={ (e) => this.handleFiles(e.target.files, i) }/>
+            );
+        }
+
         return (
             <div className="flex-container" >
-                <FilePickers className="file-pickers" length={this.props.rows} />
+                <div className="file-pickers" >
+                    {filebtns}
+                </div>
                 <div>
                     <ControlBar onPlay={this.handlePlay} onStop={this.handleStop} />
                     {grid}
