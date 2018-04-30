@@ -1,19 +1,26 @@
 import React from 'react';
 import { FilePicker } from 'react-file-picker';
+import _ from "lodash";
 
 class FilePickers extends React.Component {
     render() {
-        return (
-        <div>
+        var pickers = [];
+        for(let i = 0; i < this.props.length; i++) {
+            pickers.push(
             <FilePicker
-                onChange={FileObject => (this.setFile(FileObject))}
-                onError={errMsg => (console.log("error getting file: ", errMsg))}
-                >
-                    <button>
-                        Choose File...
-                    </button>
+                onChange={FileObject => (this.props.setFile(FileObject, i))}
+                onError={errMsg => (console.log("[", i, "]", "error getting file: ", errMsg))}
+            >
+                <button>
+                    Choose File...
+                </button>
             </FilePicker >
-        </div>
+            );
+        }
+
+        console.log("pickers: ", pickers);
+        return (
+            <div className="file-pickers" >{pickers}</div>
         );
     }
 }

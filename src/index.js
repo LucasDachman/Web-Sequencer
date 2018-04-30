@@ -163,12 +163,12 @@ class Sequencer extends React.Component {
             for (let j = 0; j < this.props.cols; j++) {
                 row.push(this.renderSquare(count++));
             }
-            grid.push(<div key={i}> {row} </div>);
+            grid.push(<div className="step-row" key={i}> {row} </div>);
         }
         return (
-            <div>
-                <FilePickers style={{display: "inline-block"}}/>
-                <div style={{display: "inline-block"}}>
+            <div className="flex-container" >
+                <FilePickers className="file-pickers" length={this.props.rows} />
+                <div>
                     <ControlBar onPlay={this.handlePlay} onStop={this.handleStop} />
                     {grid}
                     <Timeline length={this.props.cols} position={this.state.position} />
