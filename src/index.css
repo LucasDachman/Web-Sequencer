@@ -1,12 +1,9 @@
-/*
-button {
-    height: 80px;
-    width: 80px;
-}
-*/
 .step {
     height: 200px;
     width: 200px;
+    margin: 2px;
+    display: flex;
+    flex-direction: row;
 }
 
 .timelineTickActive {
@@ -45,7 +42,8 @@ button {
     justify-content: space-between;
 }
 
-input {
+.file-picker {
+    padding: 0;
     width: 200px;
     height: 20px;
     transform: rotate(-90deg);

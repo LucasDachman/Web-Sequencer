@@ -15,7 +15,6 @@ class Sequencer extends React.Component {
 
         this.path = "./Fav_Drums/";
 
-        Tone.Transport.bpm.value = 120;
         this.handleStop = this.handleStop.bind(this);
         this.handlePlay = this.handlePlay.bind(this);
 
@@ -24,14 +23,17 @@ class Sequencer extends React.Component {
             matrix: Array(this.props.rows * this.props.cols).fill(false),
             players: new Tone.Players(null).toMaster(),
             fileNames: [],
+            bpm: 120,
         };
     }
 
     componentDidMount() {
+        Tone.Transport.bpm.value = this.state.bpm;
         const loop = new Tone.Loop((time) => {
             this.stepChange();
             this.playActive(time);
         }, "4n").start(0);
+        loop.humanize = .03;
 
         // sample players
         const path = "./Fav_Drums/"
@@ -53,6 +55,7 @@ class Sequencer extends React.Component {
                 console.log(WebMidi.inputs);
                 if (!_.isNil(device)) {
                     console.log("Current device: ", device.name);
+                    this.setState({device: device});
 
                     device.addListener('noteon', 'all', (e) => {
                         this.enableStep(e.note.number);
@@ -69,7 +72,7 @@ class Sequencer extends React.Component {
         });
         this.setState({
             players: players,
-            loop: loop
+            loop: loop,
         });
  
 
@@ -80,6 +83,9 @@ class Sequencer extends React.Component {
             nextState.position === this.state.position &&
             _.isEqual(nextState.matrix, this.state.matrix)
         );
+        if (nextState.device !== this.state.device) {
+            console.log("Device Change: ", nextState.device);
+        }
         return true;
     }
 
@@ -123,10 +129,17 @@ class Sequencer extends React.Component {
         for (let i = 0; i < rows; i++) {
             const step = i * cols + position;
             if (this.state.matrix[step]) {
+                this.state.players.get(i).volume.value = this.getRandomVolume();
                 this.state.players.get(i).restart(time);
                 console.log("current player: ", i);
             }
         }
+    }
+
+    getRandomVolume() {
+        let max = 6;
+        let min = 0;
+        return -(Math.random() * (max - min) + min);
     }
 
     handleClick(i) {
@@ -151,12 +164,17 @@ class Sequencer extends React.Component {
         this.state.players.get(i).load(this.path + files[0].name);
     }
 
+    handleBpm(e) {
+        this.setState({bpm: e.target.value});
+        Tone.Transport.bpm.value = e.target.value;
+    }
+
     renderSquare(i) { var content;
         if (this.state.matrix[i]) {
-            content = <button className="step" style={{backgroundColor: "#008CBA"}} key={i} onClick={() => this.handleClick(i)} />    
+            content = <button className="step" style={{backgroundColor: "#FFFF50"}} key={i} onClick={() => this.handleClick(i)} />    
         }
         else {
-            content = <button className="step" style={{backgroundColor: "#CCFFFF"}} key={i} onClick={() => this.handleClick(i)} />    
+            content = <button className="step" style={{backgroundColor: "#FFFFFF"}} key={i} onClick={() => this.handleClick(i)} />    
         }
         return content;
     }
@@ -177,7 +195,7 @@ class Sequencer extends React.Component {
         let filebtns = [];
         for (let i = 0; i < this.props.rows; i++) {
             filebtns.push(
-                <input type="file" onChange={ (e) => this.handleFiles(e.target.files, i) }/>
+                <input type="file" className="file-picker" onChange={ (e) => this.handleFiles(e.target.files, i) } key={i}/>
             );
         }
 
@@ -187,7 +205,10 @@ class Sequencer extends React.Component {
                     {filebtns}
                 </div>
                 <div>
-                    <ControlBar onPlay={this.handlePlay} onStop={this.handleStop} />
+                    <div className="step-row">
+                        <ControlBar onPlay={this.handlePlay} onStop={this.handleStop} />
+                        <input value={this.state.bpm} type="number" onChange={ (e) => this.handleBpm(e)} />
+                    </div>
                     {grid}
                     <Timeline length={this.props.cols} position={this.state.position} />
                 </div>
@@ -197,7 +218,7 @@ class Sequencer extends React.Component {
 }
 /* =================== */
 ReactDOM.render(
-    <div style={{width: 800, height: 800}} className="container">
+    <div style={{ background: "#454545"}} className="container">
         <Sequencer rows={3} cols={4}/>
     </div>,
     document.getElementById('root')
