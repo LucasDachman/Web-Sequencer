@@ -24,6 +24,7 @@ class Sequencer extends React.Component {
             players: new Tone.Players(null).toMaster(),
             fileNames: [],
             bpm: 120,
+            volumes: Array(this.props.rows).fill(-6),
         };
     }
 
@@ -33,15 +34,16 @@ class Sequencer extends React.Component {
             this.stepChange();
             this.playActive(time);
         }, "4n").start(0);
-        loop.humanize = .03;
+        loop.humanize = .025;
 
         // sample players
         const path = "./Fav_Drums/"
-        const samples = ["P - Snap 2.wav", "P - Toms.wav", "S - Cool.wav", "Tabla.wav"];
+        const samples = ["P - Shaker.wav", "Snare Drum Delayed_2.wav", "808 vybes.wav" ];
         const players = this.state.players;
         const rows = this.props.rows;
         for( let i = 0; i < rows; i++) {
             players.add(i, path + samples[i]);
+            players.get(i).volume.value = this.state.volumes[i];
         }
 
         // webmidi
@@ -129,17 +131,20 @@ class Sequencer extends React.Component {
         for (let i = 0; i < rows; i++) {
             const step = i * cols + position;
             if (this.state.matrix[step]) {
-                this.state.players.get(i).volume.value = this.getRandomVolume();
+                //let vol = this.state.players.get(i).volume.value;
+                //this.state.players.get(i).volume.value = this.getRandomVolume(vol);
                 this.state.players.get(i).restart(time);
+                //this.state.players.get(i).volume.value = vol;
                 console.log("current player: ", i);
+                
             }
         }
     }
 
-    getRandomVolume() {
-        let max = 6;
+    getRandomVolume(vol) {
+        let max = 12;
         let min = 0;
-        return -(Math.random() * (max - min) + min);
+        return vol - (Math.random() * (max - min) + min);
     }
 
     handleClick(i) {
@@ -169,6 +174,13 @@ class Sequencer extends React.Component {
         Tone.Transport.bpm.value = e.target.value;
     }
 
+    handleVol(e,i) {
+        this.state.players.get(i).volume.value = e.target.value
+        var volumes = this.state.volumes;
+        volumes[i] = e.target.value;
+        this.setState({volumes: volumes});
+    }
+
     renderSquare(i) { var content;
         if (this.state.matrix[i]) {
             content = <button className="step" style={{backgroundColor: "#FFFF50"}} key={i} onClick={() => this.handleClick(i)} />    
@@ -195,7 +207,14 @@ class Sequencer extends React.Component {
         let filebtns = [];
         for (let i = 0; i < this.props.rows; i++) {
             filebtns.push(
-                <input type="file" className="file-picker" onChange={ (e) => this.handleFiles(e.target.files, i) } key={i}/>
+                <div className="file-picker">
+                <input type="file"  onChange={ (e) => this.handleFiles(e.target.files, i) } key={"file"+i}/>
+                <input type="range" 
+                    value={this.state.volumes[i]} 
+                    max={0} min={-24} 
+                    onChange={ (e) => this.handleVol(e,i)} 
+                    key={"range"+i}/>
+                </div>
             );
         }
 
